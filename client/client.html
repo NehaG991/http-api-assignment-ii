@@ -6,6 +6,111 @@
   
   <script>
 
+    const handleResponse = async (response, parseResponse) => {
+      const content = document.querySelector('#content');
+
+      switch(response.status) {
+        case 200: 
+          content.innerHTML = `<b>Success</b>`;
+          break;
+        case 201: 
+          content.innerHTML = `<b>Created</b>`;
+          break;
+        case 204:
+          content.innerHTML = '<b>Updated (No Content)</b>';
+          break;
+        case 400:
+          content.innerHTML = `<b>Bad Request</b>`;
+          break;
+        case 404:
+
+          break;
+        default: 
+          content.innerHTML = `Error code not implemented by client.`;
+          break;
+      }
+
+
+      // if method is GET
+      if (parseResponse)
+      {
+        let obj = await response.json();
+        console.log(obj);
+        
+        // Checks if method is get by using status code
+        if (response.status === 200)
+        {
+          content.innerHTML += `<p>${JSON.stringify(obj.message.users)}</p>`;
+        } else {
+          content.innerHTML += `<p>${JSON.stringify(obj.message)}</p>`;
+        }
+      }
+    };
+
+    // Method to Send Fetch request
+    const requestUpdate = async (form, url, method) => {
+
+      // Post Method Stuff
+      if (method === 'post')
+      {
+        const nameField = form.querySelector('#nameField');
+        const ageField = form.querySelector('#ageField') 
+
+        const formData = `name=${nameField.value}&age=${ageField.value}`;
+
+        const options = {
+          method: method, 
+          headers: {
+            'Content-Type': 'application/x-ww-form-urlencoded',
+            'Accept': 'application/json',
+          },
+          body: formData,
+        };
+
+        let fetchPromise = fetch(url, options);
+
+        // Won't parse if status code is 204
+        fetchPromise.then((response) => {handleResponse(response, response.status !== 204)});
+
+      } else {
+
+        // Get/Head method stuff
+        const options = {
+          method: method,
+          headers: {
+            'Accept': 'application/json'
+          },
+        };
+
+        let fetchPromise = fetch(url, options);
+        fetchPromise.then((response) => {handleResponse(response, method === 'get')});
+      }
+    };
+
+    const init = () => {
+      // Grabbing the two forms
+      const nameForm = document.querySelector('#nameForm');
+      const userForm = document.querySelector('#userForm');
+
+      // addUser function - POST
+      const addUser = (e) => {
+        e.preventDefault();
+        requestUpdate(nameForm, nameForm.getAttribute('action'), 'post');
+        return false;
+      };
+
+      // getUser Function - GET/HEAD
+      const getUser = (e) => {
+        e.preventDefault();
+        requestUpdate(userForm, userForm.querySelector('#urlField').value, userForm.querySelector('#methodSelect').value);
+        return false;
+      };
+
+      nameForm.addEventListener('submit', addUser);
+      userForm.addEventListener('submit', getUser);
+    };
+
+    window.onload = init;
   </script>
 </head>
 <body>
