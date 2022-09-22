@@ -13,10 +13,9 @@ const respondJSONMeta = (request, response, status) => {
   response.end();
 };
 
-// DONE
 const getUsers = (request, response) => {
   const responseJSON = {
-    message: { users },
+    users,
   };
 
   if (request.method === 'GET') {
@@ -26,10 +25,17 @@ const getUsers = (request, response) => {
 };
 
 const notReal = (request, response) => {
-  console.log('NOT REAL');
+  const responseJSON = {
+    message: 'The page you are looking for was not found',
+    id: 'notFound',
+  };
+
+  if (request.method === 'GET') {
+    return respondJSON(request, response, responseJSON, 404);
+  }
+  return respondJSONMeta(request, response, 404);
 };
 
-// DONE
 const addUser = (request, response) => {
   const oldBody = [];
 
